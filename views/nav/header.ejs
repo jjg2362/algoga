@@ -1,0 +1,58 @@
+<header id="header">
+    <div class="container">
+        <div class="header">
+            <div class="header_logo">
+                <a href="../"><img src="img/logo.png" alt="logo_img"></a>
+            </div>
+            <!--헤더 네비게이션-->
+            <div class="header_menu">
+                <% if(!login) { %>
+                    <a class="loginout" onclick="ShowLoginPopup()">Login</a>
+                <% } else { %>
+                    <a class="loginout" onclick="logout()">Logout</a>
+                <% } %>
+                <a onclick="ShowRegisterPopup()">Register</a>
+            </div>
+            <!--헤더 메뉴-->
+        </div>
+    </div>
+</header>
+
+<script type="text/javascript" src="javascripts/jquery1.11.4.js"></script>
+<script type="text/javascript">
+    var isLogined = false;
+    function logout() {
+      $.post(
+        "/detail/logout"
+      )
+        window.location.reload();
+      }
+
+    function ShowLoginPopup() {
+        //화면의 높이와 너비를 구한다.
+        var maskHeight = $(document).height();
+        var maskWidth = $(window).width();
+
+        //마스크의 높이와 너비를 화면 것으로 만들어 전체 화면을 채운다.
+        $('#mask').css({ 'width': maskWidth, 'height': maskHeight });
+
+        //애니메이션 효과
+        $('#mask').fadeToggle();
+
+        $('.login_layer').fadeToggle();
+    }
+
+    function ShowRegisterPopup() {
+        //화면의 높이와 너비를 구한다.
+        var maskHeight = $(document).height();
+        var maskWidth = $(window).width();
+
+        //마스크의 높이와 너비를 화면 것으로 만들어 전체 화면을 채운다.
+        $('#mask').css({ 'width': maskWidth, 'height': maskHeight });
+
+        //애니메이션 효과
+        $('#mask').fadeToggle();
+
+        $('.register_layer').fadeToggle();
+    }
+</script>

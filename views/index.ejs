@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title><%= title %></title>
+
+  <!--Style-->
+  <link rel="stylesheet" href="stylesheets/reset.css">
+  <link rel="stylesheet" href="stylesheets/style.css">
+  <link rel="stylesheet" href="stylesheets/slick.css">
+  <!--Web Font-->
+  <link href="https://fonts.googleapis.com/css?family=Nanum+Gothic&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Abel&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <div id="wrap">
+    <% include nav/header %>
+
+    <article id="banner">
+      <div class="banner">
+        <div class="banner_item">
+          <div class="banner_img"><span class="ir-pm">배너이미지</span></div>
+          <h1>Improve your skill</h1>
+        </div>
+      </div>
+    </article>
+    <!--배너-->
+    <section id="content">
+      <div class="container">
+        <section class="algorithm">
+          <div class="content_tit">
+            <h2>Aloga</h2>
+            <div class="tit_devider">
+              <span class="devider_line"></span>
+            </div>
+            <p>알고리즘을 배우고 문제를 풀 수 있습니다.</p>
+          </div>
+          <div class="itemlist">
+            <div class="loading-indicator">
+              <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                style="margin: auto; background: transparent; display: block;" width="200px" height="200px"
+                viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
+                <circle cx="50" cy="50" r="32" stroke-width="8" stroke="#93dbe9"
+                  stroke-dasharray="50.26548245743669 50.26548245743669" fill="none" stroke-linecap="round"
+                  transform="rotate(234.325 50 50)">
+                  <animateTransform attributeName="transform" type="rotate" repeatCount="indefinite" dur="1s"
+                    keyTimes="0;1" values="0 50 50;360 50 50"></animateTransform>
+                </circle>
+              </svg>
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <% include popup/login_popup %>
+    <% include popup/register_popup %>    
+    <% include nav/footer.html %>
+  </div>
+  <!--Java Script-->
+  <script type="text/javascript" src="javascripts/jquery1.11.4.js"></script>
+  <script type="text/javascript">
+
+
+    window.onload = function () { // 알고리즘 전부 출력함수
+      // var name1 = new Array();
+      // var exp1 = new Array();
+
+      $.post(
+        "/allalgor",
+        function (data) {
+          if (data.results == -1) {
+          }
+          else {
+            var dataArray = [];
+
+            for (i = 0; i < data.results.length; i++) {
+              dataArray.push({
+                name: data.results[i].name,
+                description: data.results[i].explanation,
+                type: data.results[i].type,
+                num: data.results[i].num
+              })
+            }
+
+            var itemListElement = document.getElementsByClassName('itemlist')
+            for (var i = 0; i < dataArray.length; i++) {
+              itemListElement[0].insertAdjacentHTML('beforeend', `
+                  <a href="/detail?id=${dataArray[i].num}"class="item ${"item" + dataArray[i].num}">
+                    <div class="item_mask">
+                        <div class="item_img"><span class="ir-pm">이미지</span></div>
+                    </div>
+                    <div class="item_tit">
+                      <p>${dataArray[i].name}</p>
+                    </div>
+                  </a>`)
+
+              if (dataArray[i].type == 1) {
+                $('.item' + dataArray[i].num).addClass('item_al');
+              }
+              else if (dataArray[i].type == 2) {
+                $('.item' + dataArray[i].num).addClass('item_ds');
+              }
+              else {
+                $('.item' + dataArray[i].num).addClass('item_etc');
+              }
+            }
+            var loadingIndicator = document.getElementsByClassName('loading-indicator')
+            loadingIndicator[0].style.display = 'none';
+          }
+        }
+      )
+    }
+    
+  </script>
+</body>
+
+</html>

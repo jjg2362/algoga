@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title><%= title %></title>
+
+    <!--Style-->
+    <link rel="stylesheet" href="stylesheets/reset.css">
+    <link rel="stylesheet" href="stylesheets/style.css">
+    <link rel="stylesheet" href="stylesheets/slick.css">
+    <!--Web Font-->
+    <link href="https://fonts.googleapis.com/css?family=Nanum+Gothic&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Abel&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div id="wrap">
+        <% include nav/header %>
+
+        <section id="content">
+            <div class="container">
+                <div class="content">
+                    <div class="cont_algo">
+                        <div>
+                            <h1 class="cont_tit tit_line"><%- algor.name %></h1>
+                        </div>
+                        <div class="cont_desc">
+                            <p class="description"> <%- algor.explanation %></p>
+                        </div>
+
+                        <div class="cont_prob" id="cont_prob">
+                            <h1 class="cont_tit tit_line">Problem</h1>
+                            <div class="prob_desc">
+                                <p class="description">그저 알고리즘을 알아보는 데에 끝낼 건가요? <br>우리의 뇌는 눈으로 훑으며 본 정보를 오래 기억하지
+                                    못합니다.<br><span class="underline">문제를 풀어보며 이 알고리즘을 자신의 것으로 만드세요!</span></p>
+                                <div class="desc_img"><span class="ir-pm">설명 이미지</span></div>
+                            </div>
+                            <ul>
+                                <% for(var i = 0; i < pro.length; i++) { %>
+                                <li class="col_item">
+                                    <div class="prob_card">
+                                        <a class="card_desc" href="<%= pro[i].link %>" target="_blank">
+                                            <h4 class="card_tit"><%- pro[i].title %></h4>
+                                            <p class="card_addr"><%- pro[i].link %></p>
+                                        </a>
+                                        <ul class="card_label_group">
+                                            <li class="card_diff"
+                                                onclick="SetStarInfo(<%- algor.num %>, <%- pro[i].num %>); ShowStarPopup()">
+
+                                                <h6>난이도</h6>
+                                                <h2><% if(pro[i].person == 0){ %>
+                                                    <%- 0 %>
+                                                    <%} else{ %>
+                                                    <%- (pro[i].star / pro[i].person).toFixed(2) %>
+                                                    <% } %>
+                                                </h2>
+                                            </li>
+                                            <li class="card_ques last_child"
+                                                onclick="ShowQuestion(); algorqueview(<%- algor.num %>, <%- pro[i].num %>)">
+                                                <h6>질문</h6>
+                                                <h2>
+                                                    <%- que_count[i].count %>
+                                                </h2>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </li>
+                                <% } %>
+                            </ul>
+                        </div>
+                        <!--문제 카드 영역-->
+
+                        <div id="cont_comm" style="display: none;">
+                            <h1 class="cont_tit tit_line">Community</h1>
+                            <p class="description">문제에 대해 자유롭게 질문하세요.<br>여러분의 답변, 5분의 투자가 큰 도움일 될 것입니다! <br>질문자는 당신의
+                                이름을 기억할 것이고, 어려움에 처했을 때 기꺼이 당신을 도울 것입니다.</p>
+
+                            <div class="comment_list mt15">
+                            </div>
+                        </div>
+                        <!--//질문 영역-->
+                    </div>
+                    <!-- //알고리즘 설명 문제 -->
+                </div>
+                <!-- //컨텐츠 영역 -->
+            </div>
+        </section>
+
+        <% include popup/star_popup %>
+        <% include popup/login_popup %>
+        <% include popup/register_popup %>        
+        
+        <% include nav/footer.html %>
+    </div>
+</body>
+<script type="text/javascript" src="javascripts/jquery1.11.4.js"></script>
+<script type="text/javascript">
+    function ShowQuestion() {
+        $('#cont_comm').slideToggle();
+    }
+    function ShowAnswer() {
+        $('#answer_comment').slideToggle();
+    }
+    /* 
+    질문 조회 함수
+    */
+    function algorqueview(algor, pronum) {
+        $.post(
+            "/detail/algorqueview",
+            { params: { algor: algor, pronum: pronum } },
+            function (data) {
+                if (data.results == -1) {
+                }
+                else {
+                    var comment_list = $('.comment_list');
+                    comment_list.empty();
+                    comment_list.append('<textarea class="comment_textarea" id="que_input">');
+                    comment_list.append("<button class='btn_confirm' type='button' onclick=algorqueadd(" + algor + "," + pronum + ")>확인</button>")
+
+                    commentListElement = document.getElementsByClassName('comment_list');
+                    for (var i = 0; i < data.results.length; i++) {
+                        commentListElement[0].insertAdjacentHTML('beforeend', `
+                                <article class="comment_item comment_item${data.results[i].num} mt30" onclick="algrorquebutton(${algor}, ${pronum}, ${data.results[i].num})"">
+                                    <div class="item_wrapper">
+                                        <figure class="image is_64x64">
+                                           <img class="is_round" src="img/user_ico.png">
+                                        </figure>
+                                        <div class="question_body${data.results[i].num} comment_body">
+                                            <div class="comment_info">
+                                                <h2 class="comment_id">jjg2362</h2>
+                                                <h6 class="comment_date">${data.results[i].date}</h6>
+                                            </div>
+                                            <div class="comment_text que_text">
+                                                ${TextTranslator(data.results[i].title)}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </article>`)
+                        algoransview(algor, pronum, data.results[i].num);
+                    }
+                }
+            }
+        )
+    }
+    function TextTranslator(str) {
+        var completedText = str.replace(/(?:\r\n|\r|\n)/g, '<br />');
+        return completedText;
+    }
+
+
+    /* 
+    질문 등록함수
+    */
+    function algorqueadd(algor, pronum) {
+        var que_input = $('#que_input').val();
+        if (que_input) {
+            $.post(
+                "/detail/algorqueadd",
+                { params: { algor: algor, pronum: pronum, title: que_input } },
+                function (data) {
+                }
+            )
+            $('#cont_prob').load(window.location.href + " #cont_prob", function () {
+                loadComplete(algor, pronum);
+            });
+        }
+        else alert("질문등록을 취소했습니다.");
+    }
+
+    function loadComplete(algor, pronum) {
+        algorqueview(algor, pronum);
+    }
+
+    /* 
+    답변 조회 함수
+    */
+    function algoransview(algor, pronum, quenum) {
+        $.post(
+            "/detail/algoransview",
+            { params: { algor: algor, pronum: pronum, quenum: quenum } },
+            function (data) {
+                if (data.results == -1) {
+                }
+                else {
+                    var comment_item = $('.comment_item' + quenum);
+                    var answer_comment = comment_item.children('.item_wrapper').children('.question_body' + quenum).children('#answer_comment');
+                    answer_comment.remove();
+
+                    var commentBodyElement = document.getElementsByClassName('question_body' + quenum);
+                    for (var i = 0; i < data.results.length; i++) {
+                        commentBodyElement[0].insertAdjacentHTML('beforeend', `
+                            <div id="answer_comment">
+                                <article class="comment_item answer_item${data.results[i].num} mt30">
+                                    <div class="item_wrapper">
+                                        <figure class="image is_32x32">
+                                            <img class="is_round" src="img/user_ico.png">
+                                        </figure>
+                                        <div class="answer_body comment_body">
+                                            <div class="comment_info">
+                                                <h2 class="comment_id">jjg2362</h2>
+                                                <h6 class="comment_date">2019-12-01</h6>
+                                            </div>
+                                            <div class="comment_text ans_text">
+                                                ${data.results[i].answer}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </article>
+                            </div>`)
+                    }
+                }
+            }
+        )
+    }
+    /*
+    답변 등록 버튼 함수
+    */
+    function algrorquebutton(algor, pronum, quenum) {
+        if ($('.answer_textarea' + quenum).length < 1) {
+            var comment_item = $('.comment_item' + quenum);
+            var comment_body = comment_item.children('.item_wrapper').children('.question_body' + quenum).children('.que_text ');
+            comment_body.after("<button class='btn_confirm' type='button' onclick=algoransadd(" + algor + "," + pronum + "," + quenum + ")>확인</button>")
+                .after('<textarea class="comment_textarea mt20 answer_textarea' + quenum + '" id="que_input">');
+        }
+    }
+    /* 
+    답변 등록함수
+    */
+    function algoransadd(algor, pronum, quenum) {
+        var ans_input = $(".answer_textarea" + quenum).val();
+        ans_input = ans_input.replace(/(?:\r\n|\r|\n)/g, '<br />');
+        if (ans_input) {
+            $.post(
+                "/detail/algoransadd",
+                { params: { algor: algor, pronum: pronum, quenum: quenum, answer: ans_input } },
+                function (data) {
+                }
+            )
+            $('#cont_prob').load(window.location.href + " #cont_prob", function () {
+                loadComplete2(algor, pronum, quenum);
+            });
+        }
+        //else alert(".");
+    }
+    function loadComplete2(algor, pronum, quenum) {
+        algoransview(algor, pronum, quenum);
+    }
+
+    /*
+    난이도 입력 함수
+    */
+    var star_info = [];
+    function SetStarInfo(algornum, pronum) {
+        star_info[0] = algornum;
+        star_info[1] = pronum;
+    }
+    function SetStarValue(starnum) {
+        star_info[2] = starnum;
+    }
+
+    function ShowStarPopup() {
+        //화면의 높이와 너비를 구한다.
+        var maskHeight = $(document).height();
+        var maskWidth = $(window).width();
+        //마스크의 높이와 너비를 화면 것으로 만들어 전체 화면을 채운다.
+        $('#mask').css({ 'width': maskWidth, 'height': maskHeight });
+        //애니메이션 효과
+        $('#mask').fadeToggle();
+
+        $('.star_layer').fadeToggle();
+
+        $(".star").on('click', function () {
+            var idx = $(this).index();
+            $(".star").removeClass("on");
+            for (var i = 0; i <= idx; i++) {
+                SetStarValue((idx + 1) * 0.5);
+                $(".star").eq(i).addClass("on");
+            }
+        });
+    }
+    function starinput() {
+        if (star_info[2] > 0) {
+            $.post(
+                "/detail/star",
+                { params: { algor: star_info[0], num: star_info[1], star: star_info[2] } },
+                function (data) {
+                }
+            )
+            $('#cont_prob').load(window.location.href + " #cont_prob");
+        }
+        else {
+            alert('점수는 0 이상만 가능합니다')
+        }
+    }
+</script>
+
+</html>
